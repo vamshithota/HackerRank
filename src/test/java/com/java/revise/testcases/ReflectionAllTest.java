@@ -1,6 +1,7 @@
 package com.java.revise.testcases;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Constructor;
@@ -129,7 +130,7 @@ public class ReflectionAllTest {
 	  
 	  // to inspect the feilds
 	  @Test
-	  public void getClassFields() throws ClassNotFoundException, NoSuchFieldException, SecurityException {
+	  public void getClassFields() throws ClassNotFoundException, NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
 		  Class<?> goatClass = Class.forName("com.java.revise.Animal");
 		  Method[] methods = goatClass.getDeclaredMethods();
 		  List<String> actualFields = getMethodNames(methods);
@@ -149,5 +150,44 @@ public class ReflectionAllTest {
 		  //to get feild type
 		  Class walksFieldType = birdClass.getDeclaredField("walks").getType();
 		  assertEquals("boolean", walksFieldType.getSimpleName());
+		  
+		  //modifying field values
+		  Class<?> birdClassToSet = Class.forName("com.java.revise.Bird");
+		  Bird bird = (Bird) birdClassToSet.getConstructor().newInstance();
+		  Field field  = birdClassToSet.getDeclaredField("walks");
+		  field.setAccessible(true);
+		  // trying assert before setting value to true
+		  assertFalse(bird.isWalks());
+		  field.set(bird, true);
+		  // trying assert after setting value to true
+		  assertTrue(bird.isWalks());
+	  }
+	// inspecting methods test case
+	  public void inspectMethodsTC() throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		  Class<?> birdClass = Class.forName("com.java.revise.Bird");
+		  // getmethods() return all methods including from super class
+		Method methods[] = birdClass.getMethods();
+		List<String> methodNames = getMethodNames(methods);
+		assertTrue(methodNames.containsAll(Arrays.asList("equals", "notifyAll", "hashCode",
+			    	        "walks", "eats", "toString")));
+		
+		List<String> actualMethods = getMethodNames(birdClass.getDeclaredMethods());
+		 List<String> expectedMethodNames = Arrays
+			      .asList("setWalks", "isWalks", "getSound", "eats");
+		assertEquals(expectedMethodNames.size(), actualMethods.size());
+		assertTrue(expectedMethodNames.containsAll(actualMethods));
+		
+		Bird newBird = (Bird)birdClass.getConstructor().newInstance();
+		Method setWalks = birdClass.getDeclaredMethod("setWalks", boolean.class);
+		Method walksMethod = birdClass.getDeclaredMethod("walks");
+		boolean  walks =(boolean)walksMethod.invoke(newBird);
+		assertFalse(walks);
+		assertFalse(newBird.isWalks());
+		
+		setWalks.invoke(newBird, true);
+		boolean result = (boolean)walksMethod.invoke(newBird);
+		assertTrue(result);
+		assertTrue(newBird.isWalks());
+		
 	  }
 }
