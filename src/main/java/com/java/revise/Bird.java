@@ -6,6 +6,9 @@ public class Bird extends Animal{
         super("bird");
     }
 
+	
+	  public String sayHi(String name) { return "Hi" + name; };
+	 
     public Bird(String name, boolean walks) {
         super(name);
         setWalks(walks);
